@@ -54,60 +54,62 @@ int selectFromList(std::vector<std::string> const &list) {
     }
 }
 
+time_t getNow(size_t taskNumber, const string &msg) {
+    printf("Задача №%zu %s в: ", (taskNumber + 1), msg.c_str());
+    std::time_t rightNow = time(nullptr);
+    std::tm* local = localtime(&rightNow);
+    cout << std::put_time(local, "%M:%S") << endl;
+
+    return rightNow;
+}
+
 int main() {
     SetConsoleCP(65001);
     SetConsoleOutputCP(65001);
-    // массив для хранения времени законченных задач
 
-    vector<time_t> tasks;
+    vector<double> tasks;
     vector<string> commands = { "begin", "end", "status", "exit" };
     time_t current{0};
-
-    // ---
-    // меню с командами begin, end, status, exit
 
     while(true) {
         int index = selectFromList(commands);
         if (commands[index] == "begin") {
-            // для первой инициализации или если ранее отработала команда end
-            if (current == 0) {
-                cout << "Отчет: Новая задача началась" << endl;
-                current = std::time(nullptr);
+            if (current != 0) {
+                double diff = std::difftime(getNow(tasks.size(), " остановлена"), current);
+                tasks.emplace_back(diff);
             }
-            else {
-                cout << "Отчет: Прежняя задача остановлена. Новая задача началась" << endl;
-                tasks.emplace_back(current);
-                current = std::time(nullptr);
-            }
+
+            current = getNow(tasks.size(), " началась");
         }
         else if (commands[index] == "end") {
             if (current == 0) {
-                cout << "Отчет: Пока нет выполняющихся задач" << endl;
+                cout << "ОТЧЁТ: пока нет выполняющихся задач." << endl;
                 continue;
             }
             else {
-                cout << "Отчет: Задача окончена" << endl;
-                tasks.emplace_back(current);
+                std::time_t rightNow = getNow(tasks.size(), " остановлена");
+
+                double diff = std::difftime(rightNow, current);
+                tasks.emplace_back(diff);
+
                 current = 0;
             }
         }
         else if (commands[index] == "status") {
+            std::time_t rightNow = time(nullptr);
             if (current) {
-                cout << "Отчет: Текущая задача:" << endl;
-                std::tm* local = std::localtime(&current);
-                // Здесь нужно будет получить текущее время и вычесть
-                // типа std::difftime(local, std::time(nullptr))
-                cout << asctime(local) << endl;
+                cout << "ОТЧЁТ: одна задача не закончена!" << endl;
+                double diff = std::difftime(rightNow, current);
+                cout << "Данная задача длится уже: " << diff << " сек. " << endl;
             }
             if (!tasks.empty()) {
-                cout << "Отчет: Список задач:" << endl;
+                cout << "ОТЧЁТ: по списку ранее завершенных задач: " << endl;
                 for (int i = 0; i < tasks.size(); ++i) {
-                    std::tm* local = std::localtime(&tasks[i]);
-                    cout << asctime(local) << endl;
+                    cout << (i + 1) << " задача длилась: " << tasks[i] << " сек. " << endl;
                 }
             }
             else {
-                cout << "Отчет: Задач пока не было" << endl;
+                cout << "ОТЧЁТ: завершенных задач пока не было." << endl;
             }
         }
         else if (commands[index] == "exit") break;

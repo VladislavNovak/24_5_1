@@ -9,48 +9,21 @@ using std::endl;
 using std::string;
 using std::vector;
 
-std::string getTrimmedString(std::string str, std::string const &whiteSpaces = " \r\n\t\v\f") {
-    auto start = str.find_first_not_of(whiteSpaces);
-    str.erase(0, start);
-    auto end = str.find_last_not_of(whiteSpaces);
-    str.erase(end + 1);
-
-    return str;
-}
-
-template<typename T>
-void outputListToStream(std::ostream &out, std::vector<T> const &list, const std::string &delim = ",") {
-    for (const auto &item : list) out << item << (item != list[list.size() - 1] ? delim : "\n");
-}
-
-std::string getUserLineString(const std::string &msg) {
+int selectMenuItem(std::vector<std::string> const &list) {
     while (true) {
-        std::string userLineString;
-        printf("%s: ", msg.c_str());
-        std::getline(std::cin, userLineString);
+        cout << (list.size() > 1 ? "Выберите одну из опций: " : "Введите команду : ");
+        for (const auto &item : list) cout << item << (item != list[list.size() - 1] ? "|" : "\n");
 
-        userLineString = getTrimmedString(userLineString);
-        if (userLineString.empty()) {
-            std::cout << "Строка не может быть пустой. Попробуйте снова!" << std::endl;
-            continue;
+        while (true) {
+            std::string userInput;
+            std::cout << "Наберите и нажмите enter: ";
+            std::getline(std::cin, userInput);
+
+            for (int i = 0; i < list.size(); ++i)
+                if (list[i] == userInput) return i;
+
+            cout << "Неверно. Попробуйте снова!" << endl;
         }
-
-        return userLineString;
-    }
-}
-
-int selectFromList(std::vector<std::string> const &list) {
-    bool isList = list.size() > 1;
-
-    while (true) {
-        cout << (isList ? "Выберите одну из опций: " : "Введите команду : ");
-        outputListToStream(std::cout, list, (isList ? "|" : ""));
-
-        auto userInput = getUserLineString("Наберите и нажмите enter");
-        // return index from list, if word found
-        for (int i = 0; i < list.size(); ++i) if (list[i] == userInput) return i;
-
-        cout << "Неверно. Попробуйте снова!" << endl;
     }
 }
 
@@ -58,7 +31,7 @@ time_t getNow(size_t taskNumber, const string &msg) {
     printf("Задача №%zu %s в: ", (taskNumber + 1), msg.c_str());
     std::time_t rightNow = time(nullptr);
     std::tm* local = localtime(&rightNow);
-    cout << std::put_time(local, "%M:%S") << endl;
+    cout << std::put_time(local, "%H:%M:%S") << endl;
 
     return rightNow;
 }
@@ -72,7 +45,7 @@ int main() {
     time_t current{0};
 
     while(true) {
-        int index = selectFromList(commands);
+        int index = selectMenuItem(commands);
         if (commands[index] == "begin") {
             if (current != 0) {
                 double diff = std::difftime(getNow(tasks.size(), " остановлена"), current);

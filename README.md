@@ -17,3 +17,49 @@
 ### <font color="tomato">Советы и рекомендации</font>
 
 Тип std::time_t принимайте за секунды и с помощью него рассчитывайте время в часах, которое было затрачено.
+
+## <font color="tomato">Примеры из лекций:</font>
+
+```c++
+#include <iostream>
+#include <vector>
+#include <ctime>
+#include <iomanip>
+using std::cout;
+using std::endl;
+using std::vector;
+
+void first_part() {
+    // получить текущее время
+    std::time_t result = std::time(nullptr);
+    // преобразовать в структуру tm
+    std::tm* local = std::localtime(&result);
+    // обычный вывод
+    cout << asctime(local) << endl;
+    // возможно вывести время на дисплей по заданному формату
+    cout << std::put_time(local, "%Y/%m/%d %H/%M/%S") << endl;
+    std::tm* custom = std::localtime(&result);
+    // можно в соответствии с переданным форматом ввести время в структуру
+    std::cin >> std::get_time(custom, "%Y");
+    cout << asctime(custom) << endl;
+}
+
+void second_part() {
+    std::time_t a = std::time(nullptr);
+    std::tm* localA = std::localtime(&a);
+    cout << asctime(localA);
+    int foo;
+    std::cin >> foo;
+    std::time_t b = std::time(nullptr);
+    std::tm* localB = std::localtime(&b);
+    cout << asctime(localB) << endl;
+
+    auto diff = std::difftime(a, b);
+    std::time_t c = b - (std::time_t)diff;
+    std::time_t d = b + (std::time_t)diff;
+    std::tm* localC = std::localtime(&c);
+    std::tm* localD = std::localtime(&d);
+    cout << asctime(localC) << endl;
+    cout << asctime(localD) << endl;
+}
+```
